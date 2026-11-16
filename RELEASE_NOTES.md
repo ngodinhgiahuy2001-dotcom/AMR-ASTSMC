@@ -1,11 +1,22 @@
-# Release Notes — Repository Preparation
+# Release Notes
 
-- Standardized MATLAB file and primary-function names by functional responsibility.
-- Preserved one-folder MATLAB execution and synchronized direct function calls, string-based checks and documentation references.
-- Restored four sensitivity/replot source files absent from the latest uploaded archive using a verified earlier archive with identical shared modules.
-- Renamed the zoom export utility to `export_zoom_figures.m` and removed collaborator-specific wording in source comments.
-- Applied the previously requested title-free convention to Gaussian/ablation/export plots; did not alter plotted data, axes, control or simulation algorithms.
-- Stored exported MATLAB FIG in a visible state to avoid the common invisible-FIG reopening issue.
-- Included GitHub `.gitignore` and clear baseline, Gaussian, ablation and sensitivity entrypoints.
+## Repository organization
 
-**Validation status:** all MATLAB function declarations, renamed references and source-file dependencies have been checked statically. Simulations have not been executed in MATLAB for this release.
+- Standardized MATLAB naming around main, config, controller, model, simulation, plotting, exporting and checks.
+- Preserved the one-folder MATLAB execution assumption.
+- Restored missing sensitivity-related modules from a verified earlier matching archive during source preparation.
+- Preserved the original scientific algorithms and fixed comparison settings during naming cleanup.
+- Adopted consistent, title-free publication plots and common ITAE sensitivity scaling.
+
+## Documentation and collaboration setup
+
+- Rebuilt the bilingual README navigation with experiment-specific commands.
+- Added explicit reproducibility, validation, figure-export and data availability policies.
+- Added structured GitHub Issue Forms for MATLAB bugs and numerical discrepancies.
+- Added contribution and pull request templates focused on scientific traceability.
+- Documented anonymous-review constraints without claiming that a private repository is anonymous.
+- Deferred `CITATION.cff` and licensing metadata until actual authorship, bibliographic metadata and rights are authorized.
+
+## Verification boundary
+
+A recorded MATLAB R2024a self-test passed **6/6 regression comparisons**. Full 30-seed and sensitivity experiments have not been rerun for these documentation changes. This commit does not modify the 58 MATLAB source files.

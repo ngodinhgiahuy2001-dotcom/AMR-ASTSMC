@@ -1,0 +1,66 @@
+name: "Numerical reproducibility"
+description: "Document a discrepancy between published and reproduced simulation metrics"
+title: "[Reproducibility]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Compare like-for-like experiments only. Deterministic RK4 and sampled Gaussian/LPF runs use different feedback schemes.
+  - type: dropdown
+    id: study
+    attributes:
+      label: Study
+      options:
+        - Deterministic baseline
+        - Sampled Gaussian/LPF
+        - Paired 30-seed statistics
+        - N0-N4 ablation
+        - ASTSMC sensitivity
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: case
+    attributes:
+      label: Operating condition and controller
+      placeholder: "Case 3 / ASTSMC"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: MATLAB release and operating system
+      placeholder: "MATLAB R2024a / Windows"
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Commit SHA
+      description: "Paste the exact source revision under test"
+    validations:
+      required: true
+  - type: textarea
+    id: settings
+    attributes:
+      label: Configuration and random seeds
+      description: "Document mode, seed ID(s), solver settings, and any modified parameters"
+    validations:
+      required: true
+  - type: textarea
+    id: values
+    attributes:
+      label: Expected and observed results
+      placeholder: |
+        Metric and units:
+        Expected:
+        Observed:
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction procedure
+      description: "Provide the minimal commands and sanitized output required to investigate the discrepancy"
+    validations:
+      required: true

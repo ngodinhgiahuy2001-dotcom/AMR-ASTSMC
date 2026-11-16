@@ -1,0 +1,59 @@
+name: "MATLAB bug report"
+description: "Report an error or unexpected program behavior"
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe a minimal reproducible example. Remove personal paths, credentials, and identifying details from logs.
+  - type: dropdown
+    id: entrypoint
+    attributes:
+      label: Experiment entry point
+      options:
+        - main
+        - main_gaussian
+        - main_gaussian_statistics
+        - main_ablation
+        - main_sensitivity
+        - main_replot_sensitivity
+        - main_selftest
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: matlab
+    attributes:
+      label: MATLAB release
+      description: "For example, R2024a"
+      placeholder: "R2024a"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: "Include relevant configuration values and the exact command"
+      placeholder: "1. Open MATLAB in the repository root..."
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Observed behavior or error
+      description: "Paste a sanitized error message or stack trace"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting files (optional)
+      description: "Relevant short logs or screenshots without sensitive information"
+    validations:
+      required: false
