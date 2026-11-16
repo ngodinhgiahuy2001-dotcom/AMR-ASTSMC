@@ -1,0 +1,28 @@
+# MATLAB temporary files
+*.asv
+*.autosave
+*.m~
+*.tmp
+*.bak
+
+# MATLAB simulation binary outputs (can be published separately)
+*.mat
+*.fig
+*.mlx~
+
+# Generated experiment results
+Results*/
+Results_*/
+Sensitivity_ITAE_Case*/
+Sensitivity_Fig18_*/
+Stage3_*/
+Repeated_Stage2_*/
+Ablation_Stage2_*/
+Selftest_*/
+Single_*/
+Publication_Figures/
+
+# Optional local environments
+.vscode/
+.DS_Store
+Thumbs.db

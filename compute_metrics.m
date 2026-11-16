@@ -1,0 +1,309 @@
+function result = compute_metrics(t,x,p,controller,caseNo)
+
+N = numel(t);
+
+
+ref   = zeros(N,7);
+ep    = zeros(N,1);
+eth   = zeros(N,1);
+u     = zeros(N,2);
+s     = zeros(N,2);
+mp    = zeros(N,1);
+alpha = nan(N,2);
+
+
+for k = 1:N
+
+    %% Reference
+
+    ref(k,:) = ...
+        model_reference_trajectory(t(k),p).';
+
+
+    %% Payload
+
+    mp(k) = ...
+        model_payload_profile(t(k));
+
+
+    %% States
+
+    q = ...
+        x(k,1:3).';
+
+
+    eta = ...
+        x(k,4:5).';
+
+
+    th = q(3);
+
+
+    %% Position error
+
+    Dx = ...
+        ref(k,1) ...
+        - q(1);
+
+
+    Dy = ...
+        ref(k,2) ...
+        - q(2);
+
+
+    ex = ...
+        cos(th)*Dx ...
+        + sin(th)*Dy;
+
+
+    ey = ...
+        -sin(th)*Dx ...
+        + cos(th)*Dy;
+
+
+    et = ...
+        atan2( ...
+            sin(ref(k,3)-th), ...
+            cos(ref(k,3)-th));
+
+
+    %% Reference signals
+
+    vd = ref(k,4);
+    wd = ref(k,5);
+
+    dvd = ref(k,6);
+    dwd = ref(k,7);
+
+
+    %% Outer-loop command
+
+    vc = ...
+        vd*cos(et) ...
+        + p.outer.kx*ex;
+
+
+    wc = ...
+        wd ...
+        + p.outer.ky*vd*ey ...
+        + p.outer.kth*sin(et);
+
+
+    %% Error derivatives
+
+    exd = ...
+        eta(2)*ey ...
+        - eta(1) ...
+        + vd*cos(et);
+
+
+    eyd = ...
+        -eta(2)*ex ...
+        + vd*sin(et);
+
+
+    etd = ...
+        wd ...
+        - eta(2);
+
+
+    %% Command derivatives
+
+    vcd = ...
+        dvd*cos(et) ...
+        - vd*sin(et)*etd ...
+        + p.outer.kx*exd;
+
+
+    wcd = ...
+        dwd ...
+        + p.outer.ky*( ...
+            dvd*ey ...
+            + vd*eyd) ...
+        + p.outer.kth*cos(et)*etd;
+
+
+    %% Sliding variable
+
+    ss = [ ...
+        eta(1)-vc; ...
+        eta(2)-wc];
+
+
+    s(k,:) = ss.';
+
+
+    %% =====================================================
+    %  Controller
+    % ======================================================
+
+    switch upper(controller)
+
+        case 'SMC'
+
+            nu = ...
+                controller_SMC( ...
+                    ss, ...
+                    p);
+
+
+        case 'STSMC'
+
+            z = ...
+                x(k,6:7).';
+
+
+            [nu,~] = ...
+                controller_STSMC( ...
+                    ss, ...
+                    z, ...
+                    p);
+
+
+        case 'ASTSMC'
+
+            z = ...
+                x(k,6:7).';
+
+
+            alpha_k = ...
+                x(k,8:9).';
+
+
+            [nu,~,~,~,~,~] = ...
+                controller_ASTSMC( ...
+                    ss, ...
+                    z, ...
+                    alpha_k, ...
+                    p);
+
+
+            alpha(k,:) = ...
+                alpha_k.';
+
+    end
+
+
+    %% Control input
+
+    uv = ...
+        p.Bv0*eta(1) ...
+        + p.m0*vcd ...
+        + p.m0*nu(1);
+
+
+    uw = ...
+        p.Bw0*eta(2) ...
+        + p.J0*wcd ...
+        + p.J0*nu(2);
+
+
+    u(k,:) = [uv,uw];
+
+
+    %% Tracking errors
+
+    ep(k) = ...
+        hypot(Dx,Dy);
+
+
+    eth(k) = ...
+        et;
+
+end
+
+
+%% =========================================================
+%  Metrics
+% ==========================================================
+
+T = t(end)-t(1);
+
+
+metrics.RMSE_pos = ...
+    sqrt( ...
+        trapz(t,ep.^2) ...
+        / T);
+
+
+metrics.Max_pos = ...
+    max(ep);
+
+
+metrics.RMSE_theta = ...
+    sqrt( ...
+        trapz(t,eth.^2) ...
+        / T);
+
+
+metrics.IAE = ...
+    trapz(t,ep);
+
+
+metrics.ISE = ...
+    trapz(t,ep.^2);
+
+
+metrics.ITAE = ...
+    trapz(t,t.*ep);
+
+
+metrics.RMS_uv = ...
+    sqrt( ...
+        trapz(t,u(:,1).^2) ...
+        / T);
+
+
+metrics.RMS_uw = ...
+    sqrt( ...
+        trapz(t,u(:,2).^2) ...
+        / T);
+
+
+%% ASTSMC gain metrics
+
+if strcmpi(controller,'ASTSMC')
+
+    metrics.Max_alpha_v = ...
+        max(alpha(:,1));
+
+
+    metrics.Max_alpha_w = ...
+        max(alpha(:,2));
+
+
+    metrics.Mean_alpha_v = ...
+        mean(alpha(:,1));
+
+
+    metrics.Mean_alpha_w = ...
+        mean(alpha(:,2));
+
+else
+
+    metrics.Max_alpha_v  = NaN;
+    metrics.Max_alpha_w  = NaN;
+
+    metrics.Mean_alpha_v = NaN;
+    metrics.Mean_alpha_w = NaN;
+
+end
+
+
+%% Output
+
+result = struct( ...
+    't',t, ...
+    'x',x, ...
+    'ref',ref, ...
+    'ep',ep, ...
+    'eth',eth, ...
+    'u',u, ...
+    's',s, ...
+    'mp',mp, ...
+    'alpha',alpha, ...
+    'controller',controller, ...
+    'caseNo',caseNo, ...
+    'metrics',metrics);
+
+end
